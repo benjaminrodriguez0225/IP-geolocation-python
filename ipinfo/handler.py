@@ -16,8 +16,8 @@ from .exceptions import RequestQuotaExceededError
 
 class Handler:
     """
-    Allows client to request data for specified IP address. Instantiates and
-    and maintains access to cache.
+    Allows client to request data for specified IP address.
+    Instantiates and maintains access to cache.
     """
 
     API_URL = "https://ipinfo.io"
@@ -120,7 +120,7 @@ class Handler:
     def _get_headers(self):
         """Built headers for request to IPinfo API."""
         headers = {
-            "user-agent": "IPinfoClient/Python{version}/2.0.0".format(
+            "user-agent": "IPinfoClient/Python{version}/3.0.0".format(
                 version=sys.version_info[0]
             ),
             "accept": "application/json",

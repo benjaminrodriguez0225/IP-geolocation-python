@@ -1,5 +1,6 @@
 from ipaddress import IPv4Address
 import json
+import os
 
 from ipinfo.cache.default import DefaultCache
 from ipinfo.details import Details
@@ -25,19 +26,52 @@ def test_headers():
 
 
 def test_get_details():
-    handler = Handler()
-    fake_details = {"country": "US", "ip": "127.0.0.1", "loc": "12.34,56.78"}
-
-    handler._requestDetails = lambda x: fake_details
-
-    details = handler.getDetails(fake_details["ip"])
+    token = os.environ.get('IPINFO_TOKEN', '')
+    handler = Handler(token)
+    details = handler.getDetails("8.8.8.8")
     assert isinstance(details, Details)
-    assert details.country == fake_details["country"]
+    assert details.ip == "8.8.8.8"
+    assert details.hostname == "dns.google"
+    assert details.city == "Mountain View"
+    assert details.region == "California"
+    assert details.country == "US"
     assert details.country_name == "United States"
-    assert details.ip == fake_details["ip"]
-    assert details.loc == fake_details["loc"]
-    assert details.longitude == "56.78"
-    assert details.latitude == "12.34"
+    assert details.loc == "37.4056,-122.0775"
+    assert details.latitude == "37.4056"
+    assert details.longitude == "-122.0775"
+    assert details.postal == "94043"
+    assert details.timezone == "America/Los_Angeles"
+    if token:
+        asn = details.asn
+        assert asn["asn"] == "AS15169"
+        assert asn["name"] == "Google LLC"
+        assert asn["domain"] == "google.com"
+        assert asn["route"] == "8.8.8.0/24"
+        assert asn["type"] == "business"
+
+        company = details.company
+        assert company["name"] == "Google LLC"
+        assert company["domain"] == "google.com"
+        assert company["type"] == "business"
+
+        privacy = details.privacy
+        assert privacy["vpn"] == False
+        assert privacy["proxy"] == False
+        assert privacy["tor"] == False
+        assert privacy["hosting"] == False
+
+        abuse = details.abuse
+        assert abuse["address"] == "US, CA, Mountain View, 1600 Amphitheatre Parkway, 94043"
+        assert abuse["country"] == "US"
+        assert abuse["email"] == "network-abuse@google.com"
+        assert abuse["name"] == "Abuse"
+        assert abuse["network"] == "8.8.8.0/24"
+        assert abuse["phone"] == "+1-650-253-0000"
+
+        domains = details.domains
+        assert domains["ip"] == "8.8.8.8"
+        assert domains["total"] == 12988
+        assert len(domains["domains"]) == 5
 
 
 def test_builtin_ip_types():
