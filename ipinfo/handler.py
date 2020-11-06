@@ -16,8 +16,8 @@ from .exceptions import RequestQuotaExceededError
 
 class Handler:
     """
-    Allows client to request data for specified IP address. Instantiates and
-    and maintains access to cache.
+    Allows client to request data for specified IP address.
+    Instantiates and maintains access to cache.
     """
 
     API_URL = "https://ipinfo.io"
@@ -27,13 +27,21 @@ class Handler:
     REQUEST_TIMEOUT_DEFAULT = 2
 
     def __init__(self, access_token=None, **kwargs):
-        """Initialize the Handler object with country name list and the cache initialized."""
+        """
+        Initialize the Handler object with country name list and the
+        cache initialized.
+        """
         self.access_token = access_token
+
+        # load countries file
         self.countries = self._read_country_names(kwargs.get("countries_file"))
+
+        # setup req opts
         self.request_options = kwargs.get("request_options", {})
         if "timeout" not in self.request_options:
             self.request_options["timeout"] = self.REQUEST_TIMEOUT_DEFAULT
 
+        # setup cache
         if "cache" in kwargs:
             self.cache = kwargs["cache"]
         else:
@@ -58,9 +66,12 @@ class Handler:
         # the IPs not in the cache.
         lookup_addresses = []
         for ip_address in ip_addresses:
-            # If the supplied IP address uses the objects defined in the built-in module ipaddress
-            # extract the appropriate string notation before formatting the URL
-            if isinstance(ip_address, IPv4Address) or isinstance(ip_address, IPv6Address):
+            # If the supplied IP address uses the objects defined in the
+            # built-in module ipaddress extract the appropriate string notation
+            # before formatting the URL.
+            if isinstance(ip_address, IPv4Address) or isinstance(
+                ip_address, IPv6Address
+            ):
                 ip_address = ip_address.exploded
 
             if ip_address in self.cache:
@@ -97,9 +108,12 @@ class Handler:
     def _requestDetails(self, ip_address=None):
         """Get IP address data by sending request to IPinfo API."""
 
-        # If the supplied IP address uses the objects defined in the built-in module ipaddress
-        # extract the appropriate string notation before formatting the URL
-        if isinstance(ip_address, IPv4Address) or isinstance(ip_address, IPv6Address):
+        # If the supplied IP address uses the objects defined in the built-in
+        # module ipaddress extract the appropriate string notation before
+        # formatting the URL.
+        if isinstance(ip_address, IPv4Address) or isinstance(
+            ip_address, IPv6Address
+        ):
             ip_address = ip_address.exploded
 
         if ip_address not in self.cache:
@@ -120,7 +134,7 @@ class Handler:
     def _get_headers(self):
         """Built headers for request to IPinfo API."""
         headers = {
-            "user-agent": "IPinfoClient/Python{version}/2.0.0".format(
+            "user-agent": "IPinfoClient/Python{version}/4.0.0".format(
                 version=sys.version_info[0]
             ),
             "accept": "application/json",
@@ -145,7 +159,10 @@ class Handler:
         return lat, lon
 
     def _read_country_names(self, countries_file=None):
-        """Read list of countries from specified country file or default file."""
+        """
+        Read list of countries from specified country file or
+        default file.
+        """
         if not countries_file:
             countries_file = os.path.join(
                 os.path.dirname(__file__), self.COUNTRY_FILE_DEFAULT
